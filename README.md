@@ -1,0 +1,1 @@
+# Aura Music Player \n\nDescription: A comprehensive music player application designed to provide a seamless and intuitive user experience. \n\nFeatures: \n- Playback controls \n- Playlist management \n- Audio formats support \n\nGetting Started: \n- Instructions on how to set up and use the project. \n\nContributing: \n- Guidelines for contributions.
