@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <group android:checkableBehavior="single">
+        <item
+            android:id="@+id/nav_home"
+            android:icon="@drawable/ic_music_note"
+            android:title="Library" />
+
+        <item
+            android:id="@+id/nav_settings"
+            android:icon="@drawable/ic_settings"
+            android:title="Settings" />
+    </group>
+
+    <item android:title="Audio Settings">
+        <menu>
+            <item
+                android:id="@+id/nav_equalizer"
+                android:icon="@drawable/ic_equalizer"
+                android:title="Equalizer" />
+
+            <item
+                android:id="@+id/nav_hd_audio"
+                android:icon="@drawable/ic_hd"
+                android:title="High Definition Audio" />
+
+            <item
+                android:id="@+id/nav_sound_booster"
+                android:icon="@drawable/ic_tune"
+                android:title="Sound Booster" />
+        </menu>
+    </item>
+
+    <item android:title="Appearance">
+        <menu>
+            <item
+                android:id="@+id/nav_themes"
+                android:icon="@drawable/ic_shirt"
+                android:title="Themes" />
+        </menu>
+    </item>
+
+    <item android:title="Other">
+        <menu>
+            <item
+                android:id="@+id/nav_about"
+                android:icon="@drawable/ic_about"
+                android:title="About Us" />
+            <item
+                android:id="@+id/nav_privacy"
+                android:icon="@drawable/ic_privacy"
+                android:title="Privacy Policy" />
+        </menu>
+    </item>
+
+</menu>

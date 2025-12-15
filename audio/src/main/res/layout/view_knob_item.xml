@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="0dp"
+    android:layout_height="wrap_content"
+    android:layout_weight="1"
+    android:gravity="center"
+    android:orientation="vertical">
+
+    <com.rank2gaming.aura.audio.views.RotaryKnobView
+        android:id="@+id/knob"
+        android:layout_width="90dp"
+        android:layout_height="90dp"/>
+
+    <TextView
+        android:id="@+id/label"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="LABEL"
+        android:textSize="12sp"
+        android:textColor="#555"
+        android:layout_marginTop="4dp"/>
+</LinearLayout>

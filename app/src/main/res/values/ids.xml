@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <item name="btn_play_pause" type="id" />
+
+    <item name="btn_favorite" type="id" />
+
+    <item name="btn_queue" type="id" />
+
+    <item name="btn_timer" type="id" />
+
+    <item name="btnMenu" type="id" />
+    <item name="btn_more" type="id" />
+
+    <item name="btn_back" type="id" />
+
+    <item name="btnTheme" type="id" />
+
+    <item name="btn_equalizer" type="id" />
+    <item name="btn_visual_effect" type="id" />
+    <item name="btn_hd_audio" type="id" />
+
+    <item name="txt_title_big" type="id" />
+
+    <item name="txt_artist_big" type="id" />
+
+    <item name="txt_current_time" type="id" />
+    <item name="txt_total_duration" type="id" />
+    <item name="timeCapsule" type="id" />
+
+    <item name="seekBar" type="id" />
+
+    <item name="imgAlbumArt" type="id" />
+    <item name="img_album_art_big" type="id" />
+
+    <item name="card_album_art" type="id" />
+
+    <item name="visualizer_full" type="id" />
+    <item name="visualizer_play_btn" type="id" />
+
+    <item name="adViewFooter" type="id" />
+    <item name="adViewPlayer" type="id" />
+
+</resources>
