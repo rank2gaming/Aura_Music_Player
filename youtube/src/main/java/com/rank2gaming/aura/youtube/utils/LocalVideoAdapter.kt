@@ -6,8 +6,8 @@ import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
 import com.rank2gaming.aura.youtube.databinding.ItemYoutubeVideoBinding
+import java.util.Locale // Added for Locale.US
 
-// Explicit class for Local Videos
 data class LocalVideoItem(
     val uri: Uri,
     val name: String,
@@ -19,7 +19,6 @@ class LocalVideoAdapter(
     private val onClick: (Uri) -> Unit
 ) : RecyclerView.Adapter<LocalVideoAdapter.LocalViewHolder>() {
 
-    // Reusing the YouTube card layout for consistency
     class LocalViewHolder(val binding: ItemYoutubeVideoBinding) : RecyclerView.ViewHolder(binding.root)
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): LocalViewHolder {
@@ -33,10 +32,9 @@ class LocalVideoAdapter(
         holder.binding.txtTitle.text = video.name
         holder.binding.txtChannel.text = formatDuration(video.duration)
 
-        // Load thumbnail using Glide
         Glide.with(holder.itemView.context)
             .load(video.uri)
-            .into(holder.binding.imgThumbnail) // XML handles scaleType="centerCrop"
+            .into(holder.binding.imgThumbnail)
 
         holder.itemView.setOnClickListener {
             onClick(video.uri)
@@ -48,6 +46,7 @@ class LocalVideoAdapter(
     private fun formatDuration(millis: Long): String {
         val seconds = (millis / 1000) % 60
         val minutes = (millis / (1000 * 60)) % 60
-        return String.format("%02d:%02d", minutes, seconds)
+        // FIX: Use Locale.US to prevent lint warning
+        return String.format(Locale.US, "%02d:%02d", minutes, seconds)
     }
 }

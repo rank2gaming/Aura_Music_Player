@@ -444,7 +444,7 @@ class MainActivity : AppCompatActivity(), MusicService.ServiceCallbacks {
             MediaStore.Audio.Media.DURATION,
             MediaStore.Audio.Media.ALBUM_ID
         )
-        // Duration filter (>10s) supports M4A/WAV/FLAC
+        // M4A/WAV Fix: Filter by Duration > 10s instead of IS_MUSIC
         val selection = "${MediaStore.Audio.Media.DURATION} >= 10000"
 
         try {

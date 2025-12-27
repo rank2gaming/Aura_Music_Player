@@ -9,6 +9,7 @@ import android.app.PendingIntent
 import android.app.Service
 import android.content.BroadcastReceiver
 import android.content.ComponentName
+import android.content.ContentUris
 import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
@@ -58,7 +59,9 @@ import com.rank2gaming.aura.audio.IAudioService
 import com.rank2gaming.aura.audio.SoundBoosterActivity
 import com.rank2gaming.aura.model.Song
 import com.rank2gaming.aura.utils.BalanceAudioProcessor
+import com.rank2gaming.aura.utils.FormatUtils
 import com.rank2gaming.aura.utils.HistoryManager
+import com.rank2gaming.aura.utils.PlaylistManager
 import com.rank2gaming.aura.utils.SettingsManager
 import java.util.ArrayList
 
@@ -109,6 +112,7 @@ class MusicService : Service(), IAudioService, AudioFeatureListener {
         const val ACTION_OPEN_EQ = "com.rank2gaming.aura.ACTION_OPEN_EQ"
         const val ACTION_OPEN_BOOSTER = "com.rank2gaming.aura.ACTION_OPEN_BOOSTER"
         const val ACTION_TOGGLE_HD = "com.rank2gaming.aura.ACTION_TOGGLE_HD"
+        const val PLAYLIST_FAVORITES = "My favourite"
         const val TAG = "MusicService"
     }
 
@@ -271,6 +275,26 @@ class MusicService : Service(), IAudioService, AudioFeatureListener {
         })
     }
 
+    // --- FAVORITES LOGIC ---
+    private fun checkIsFavorite() {
+        val song = songList.getOrNull(songPos) ?: return
+        val favorites = PlaylistManager.getPlaylists(this)[PLAYLIST_FAVORITES] ?: emptyList()
+        isFavorite = favorites.contains(song.id)
+    }
+
+    fun toggleFavorite() {
+        val song = songList.getOrNull(songPos) ?: return
+        isFavorite = !isFavorite
+
+        if (isFavorite) {
+            PlaylistManager.createPlaylist(this, PLAYLIST_FAVORITES)
+            PlaylistManager.addSongToPlaylist(this, PLAYLIST_FAVORITES, song.id)
+        } else {
+            PlaylistManager.removeSongFromPlaylist(this, PLAYLIST_FAVORITES, song.id)
+        }
+        notifyUI()
+    }
+
     private fun releaseAudioEffects() {
         try {
             loudnessEnhancer?.release(); loudnessEnhancer = null
@@ -315,6 +339,11 @@ class MusicService : Service(), IAudioService, AudioFeatureListener {
             } catch (e: Exception) {}
 
         } catch (e: Exception) { e.printStackTrace() }
+    }
+
+    // New Helper for Visualizer Linkage (Crucial for PlayerActivity)
+    fun getAudioSessionId(): Int {
+        return exoPlayer?.audioSessionId ?: 0
     }
 
     private fun restoreEQSettings() {
@@ -429,7 +458,15 @@ class MusicService : Service(), IAudioService, AudioFeatureListener {
                     songList.add(song)
                     songPos = 0
 
-                    val item = MediaItem.fromUri(Uri.parse(song.path))
+                    // FIX: Use Content URI for direct playback from internal logic
+                    val contentUri = ContentUris.withAppendedId(MediaStore.Audio.Media.EXTERNAL_CONTENT_URI, song.id)
+                    val mimeType = FormatUtils.getMimeType(this, contentUri)
+
+                    val item = MediaItem.Builder()
+                        .setUri(contentUri)
+                        .setMimeType(mimeType)
+                        .build()
+
                     exoPlayer?.setMediaItem(item)
                     exoPlayer?.prepare()
 
@@ -437,6 +474,7 @@ class MusicService : Service(), IAudioService, AudioFeatureListener {
                     if (lastPos > 0) exoPlayer?.seekTo(lastPos.toLong())
 
                     currentAlbumArtBitmap = getAlbumArtBitmap(song.albumId)
+                    checkIsFavorite() // Check favorite state
 
                     if ((exoPlayer?.audioSessionId ?: 0) != 0) {
                         rebuildAudioEffects(exoPlayer!!.audioSessionId)
@@ -467,9 +505,23 @@ class MusicService : Service(), IAudioService, AudioFeatureListener {
 
         SettingsManager.setLastSongId(this, song.id)
         HistoryManager.addSongToHistory(this, song.id)
+        checkIsFavorite() // Update favorite state
 
         try {
-            val item = MediaItem.fromUri(Uri.parse(song.path))
+            // FIX: Use Content URI to bypass file path restrictions on Android 11+ (M4A Support)
+            val uri = if (song.id != -1L) {
+                ContentUris.withAppendedId(MediaStore.Audio.Media.EXTERNAL_CONTENT_URI, song.id)
+            } else {
+                Uri.parse(song.path)
+            }
+
+            val mimeType = FormatUtils.getMimeType(this, uri)
+
+            val item = MediaItem.Builder()
+                .setUri(uri)
+                .setMimeType(mimeType)
+                .build()
+
             exoPlayer?.setMediaItem(item)
             exoPlayer?.prepare()
             exoPlayer?.play()
@@ -564,7 +616,6 @@ class MusicService : Service(), IAudioService, AudioFeatureListener {
         getSystemService(NotificationManager::class.java).createNotificationChannel(channel)
     }
 
-    // Use SystemClock for accurate seek bar sync
     private fun updateMediaSessionState(state: Int) {
         val playbackState = if (isPlaying()) PlaybackStateCompat.STATE_PLAYING else PlaybackStateCompat.STATE_PAUSED
         val speed = if (isPlaying()) 1.0f else 0f

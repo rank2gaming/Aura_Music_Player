@@ -1,3 +1,5 @@
+@file:Suppress("DEPRECATION") // Fixes warnings for Virtualizer
+
 package com.rank2gaming.aura.audio
 
 import android.content.Context
@@ -38,6 +40,8 @@ object AudioEffectManager {
 
     // Hardware Init
     fun createEqualizer(sessionId: Int): Equalizer? = try { Equalizer(0, sessionId).apply { enabled = true } } catch (e: Exception) { null }
+
     fun createBassBoost(sessionId: Int): BassBoost? = try { BassBoost(0, sessionId).apply { enabled = true } } catch (e: Exception) { null }
+
     fun createVirtualizer(sessionId: Int): Virtualizer? = try { Virtualizer(0, sessionId).apply { enabled = true } } catch (e: Exception) { null }
 }

@@ -1,6 +1,132 @@
 <?xml version="1.0" encoding="utf-8"?>
 <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
-             android:layout_width="match_parent"
-             android:layout_height="match_parent">
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/mini_player_root"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:background="#1A1A1A"
+    android:clickable="true"
+    android:focusable="true"
+    android:elevation="12dp"
+    android:padding="8dp">
+
+    <FrameLayout
+        android:id="@+id/art_frame"
+        android:layout_width="50dp"
+        android:layout_height="50dp"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent">
+
+        <ImageView
+            android:id="@+id/img_mini_art"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:src="@drawable/ic_music_note"
+            android:scaleType="centerCrop"/>
+
+        <com.rank2gaming.aura.ui.AuraVisualizerView
+            android:id="@+id/visualizer_mini_art"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:visibility="gone"/>
+    </FrameLayout>
+
+    <LinearLayout
+        android:id="@+id/info_container"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:layout_marginStart="12dp"
+        android:layout_marginEnd="12dp"
+        android:gravity="center_vertical"
+        app:layout_constraintStart_toEndOf="@id/art_frame"
+        app:layout_constraintEnd_toStartOf="@id/controls_container"
+        app:layout_constraintTop_toTopOf="@id/art_frame"
+        app:layout_constraintBottom_toBottomOf="@id/art_frame">
+
+        <TextView
+            android:id="@+id/txt_mini_title"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Song Title"
+            android:textColor="#FFFFFF"
+            android:textSize="16sp"
+            android:textStyle="bold"
+            android:singleLine="true"
+            android:ellipsize="marquee"
+            android:marqueeRepeatLimit="marquee_forever"/>
+
+        <TextView
+            android:id="@+id/txt_mini_artist"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Artist Name"
+            android:textColor="#B0B0B0"
+            android:textSize="12sp"
+            android:singleLine="true"
+            android:ellipsize="end"/>
+    </LinearLayout>
+
+    <LinearLayout
+        android:id="@+id/controls_container"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:gravity="center_vertical"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="@id/art_frame"
+        app:layout_constraintBottom_toBottomOf="@id/art_frame">
+
+        <ImageView
+            android:id="@+id/btnMiniPrev"
+            android:layout_width="32dp"
+            android:layout_height="32dp"
+            android:src="@drawable/ic_skip_previous"
+            app:tint="#FFFFFF"
+            android:padding="4dp"
+            android:visibility="gone"
+            android:layout_marginEnd="8dp"/>
+
+        <FrameLayout
+            android:layout_width="48dp"
+            android:layout_height="48dp">
+
+            <com.rank2gaming.aura.ui.AuraVisualizerView
+                android:id="@+id/visualizer_mini_btn"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:visibility="gone"/>
+
+            <ImageView
+                android:id="@+id/btn_mini_play"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:src="@drawable/ic_play"
+                app:tint="#FFFFFF"
+                android:padding="8dp"/>
+        </FrameLayout>
+
+        <ImageView
+            android:id="@+id/btnMiniNext"
+            android:layout_width="32dp"
+            android:layout_height="32dp"
+            android:src="@drawable/ic_skip_next"
+            app:tint="#FFFFFF"
+            android:padding="4dp"
+            android:visibility="gone"
+            android:layout_marginStart="8dp"/>
+    </LinearLayout>
+
+    <SeekBar
+        android:id="@+id/miniSeekBar"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="12dp"
+        android:progressTint="#FF0000"
+        android:thumbTint="#FF0000"
+        android:visibility="gone"
+        app:layout_constraintTop_toBottomOf="@id/art_frame"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"/>
 
 </androidx.constraintlayout.widget.ConstraintLayout>

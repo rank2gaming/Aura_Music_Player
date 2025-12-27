@@ -19,9 +19,8 @@ android {
     }
 
     signingConfigs {
-        // Created a release configuration with placeholders
         create("release") {
-            storeFile = file("C:\\ProgramData\\Microsoft\\Windows\\Start Menu\\Programs\\Android Studio\\my_release1_key.jks") // e.g., "my-release-key.jks"
+            storeFile = file("C:\\ProgramData\\Microsoft\\Windows\\Start Menu\\Programs\\Android Studio\\my_release1_key.jks")
             storePassword = "801680"
             keyAlias = "key0"
             keyPassword = "801680"
@@ -35,12 +34,12 @@ android {
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
             )
-            // Apply the release signing configuration
             signingConfig = signingConfigs.getByName("release")
             isDebuggable = false
         }
         getByName("debug") {
             isDebuggable = true
+            isMinifyEnabled = false
         }
     }
 
@@ -82,10 +81,18 @@ dependencies {
     implementation("com.google.code.gson:gson:2.10.1")
     implementation("com.google.android.gms:play-services-ads:23.3.0")
 
+    // --- FIX: Added Missing Legacy Media Dependency ---
+    // Required for MediaSessionCompat, MediaMetadataCompat, MediaStyle, MediaButtonReceiver
+    implementation("androidx.media:media:1.7.0")
+    // ------------------------------------------------
+
     // Media3 (ExoPlayer)
     implementation("androidx.media3:media3-exoplayer:1.4.1")
     implementation("androidx.media3:media3-ui:1.4.1")
     implementation("androidx.media3:media3-session:1.4.1")
     implementation("androidx.media3:media3-common:1.4.1")
-    implementation("androidx.media:media:1.7.0")
+
+    testImplementation("junit:junit:4.13.2")
+    androidTestImplementation("androidx.test.ext:junit:1.2.1")
+    androidTestImplementation("androidx.test.espresso:espresso-core:3.6.1")
 }

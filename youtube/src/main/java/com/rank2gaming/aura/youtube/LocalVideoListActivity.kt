@@ -17,6 +17,8 @@ import com.rank2gaming.aura.youtube.databinding.ActivityLocalVideoListBinding
 import com.rank2gaming.aura.youtube.utils.LocalVideoAdapter
 import com.rank2gaming.aura.youtube.utils.LocalVideoItem
 
+// FIX: Added OptIn for Media3 Unstable API usage
+@androidx.annotation.OptIn(androidx.media3.common.util.UnstableApi::class)
 class LocalVideoListActivity : AppCompatActivity() {
 
     private lateinit var binding: ActivityLocalVideoListBinding
@@ -39,23 +41,25 @@ class LocalVideoListActivity : AppCompatActivity() {
         binding.recyclerView.layoutManager = GridLayoutManager(this, 2)
         adapter = LocalVideoAdapter(videoList) { videoUri ->
             val intent = Intent(this, LocalPlayerActivity::class.java)
-            intent.data = videoUri
+            intent.putExtra("VIDEO_URI", videoUri.toString())
             startActivity(intent)
         }
         binding.recyclerView.adapter = adapter
     }
 
     private fun checkPermissions() {
-        val permission = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-            Manifest.permission.READ_MEDIA_VIDEO
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            if (ContextCompat.checkSelfPermission(this, Manifest.permission.READ_MEDIA_VIDEO) != PackageManager.PERMISSION_GRANTED) {
+                ActivityCompat.requestPermissions(this, arrayOf(Manifest.permission.READ_MEDIA_VIDEO), PERMISSION_REQUEST_CODE)
+            } else {
+                loadLocalVideos()
+            }
         } else {
-            Manifest.permission.READ_EXTERNAL_STORAGE
-        }
-
-        if (ContextCompat.checkSelfPermission(this, permission) != PackageManager.PERMISSION_GRANTED) {
-            ActivityCompat.requestPermissions(this, arrayOf(permission), PERMISSION_REQUEST_CODE)
-        } else {
-            loadLocalVideos()
+            if (ContextCompat.checkSelfPermission(this, Manifest.permission.READ_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
+                ActivityCompat.requestPermissions(this, arrayOf(Manifest.permission.READ_EXTERNAL_STORAGE), PERMISSION_REQUEST_CODE)
+            } else {
+                loadLocalVideos()
+            }
         }
     }
 
@@ -66,10 +70,16 @@ class LocalVideoListActivity : AppCompatActivity() {
             MediaStore.Video.Media.DISPLAY_NAME,
             MediaStore.Video.Media.DURATION
         )
-        val sortOrder = "${MediaStore.Video.Media.DATE_ADDED} DESC"
 
         try {
-            val cursor = contentResolver.query(MediaStore.Video.Media.EXTERNAL_CONTENT_URI, projection, null, null, sortOrder)
+            val cursor = contentResolver.query(
+                MediaStore.Video.Media.EXTERNAL_CONTENT_URI,
+                projection,
+                null,
+                null,
+                "${MediaStore.Video.Media.DATE_ADDED} DESC"
+            )
+
             cursor?.use {
                 val idColumn = it.getColumnIndexOrThrow(MediaStore.Video.Media._ID)
                 val nameColumn = it.getColumnIndexOrThrow(MediaStore.Video.Media.DISPLAY_NAME)

@@ -8,11 +8,11 @@ import android.media.AudioManager
 import android.os.Bundle
 import android.view.*
 import android.widget.SeekBar
-import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.WindowCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.WindowInsetsControllerCompat
+import androidx.core.view.isVisible
 import com.google.android.gms.ads.AdRequest
 import com.google.android.gms.ads.AdSize
 import com.google.android.gms.ads.AdView
@@ -20,97 +20,106 @@ import com.pierfrancescosoffritti.androidyoutubeplayer.core.player.PlayerConstan
 import com.pierfrancescosoffritti.androidyoutubeplayer.core.player.YouTubePlayer
 import com.pierfrancescosoffritti.androidyoutubeplayer.core.player.listeners.AbstractYouTubePlayerListener
 import com.pierfrancescosoffritti.androidyoutubeplayer.core.player.options.IFramePlayerOptions
-import com.rank2gaming.aura.audio.EqualizerSettingsActivity
-import com.rank2gaming.aura.audio.HighDefAudioSettingsActivity
-import com.rank2gaming.aura.audio.SoundBoosterActivity
 import com.rank2gaming.aura.youtube.databinding.ActivityYoutubePlayerBinding
+import java.util.Locale
 import kotlin.math.abs
 
 class YouTubePlayerActivity : AppCompatActivity() {
 
     private lateinit var binding: ActivityYoutubePlayerBinding
     private var youTubePlayer: YouTubePlayer? = null
+    private var videoId: String = ""
     private var isFullscreen = false
-    private var isPlaying = true
-    private var duration = 0f
+    private var currentDuration = 0f
+    private var isPlaying = false // Track playback state
 
-    private var audioManager: AudioManager? = null
+    // Gestures
     private var deviceWidth = 0
-    private var maxVolume = 0
-    private var currentVolume = 0
+    private var audioManager: AudioManager? = null
     private var startY = 0f
     private var startX = 0f
     private var isVolumeGesture = false
     private var isBrightnessGesture = false
+    private var isSeeking = false
+    private var initialTouchVolume = 0
+    private var initialTouchBrightness = 0f
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivityYoutubePlayerBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-        val videoId = intent.getStringExtra("VIDEO_ID") ?: ""
-        if (videoId.isEmpty()) {
-            Toast.makeText(this, "Video Unavailable", Toast.LENGTH_SHORT).show()
-            finish()
-            return
-        }
-
+        videoId = intent.getStringExtra("VIDEO_ID") ?: ""
         audioManager = getSystemService(Context.AUDIO_SERVICE) as AudioManager
-        maxVolume = audioManager?.getStreamMaxVolume(AudioManager.STREAM_MUSIC) ?: 15
         deviceWidth = resources.displayMetrics.widthPixels
 
-        // BACK BUTTON
-        binding.btnBackPlayer.setOnClickListener { finish() }
-
-        initPlayer(videoId)
-        loadAds()
+        setupYouTubePlayer()
         setupControls()
         setupGestures()
+        loadBannerAd()
     }
 
-    private fun initPlayer(videoId: String) {
-        lifecycle.addObserver(binding.youtubePlayerView)
-        val options = IFramePlayerOptions.Builder().controls(0).build()
+    private fun loadBannerAd() {
+        val adView = AdView(this)
+        adView.setAdSize(AdSize.BANNER)
+        adView.adUnitId = "ca-app-pub-3940256099942544/6300978111" // Test ID
+        binding.adContainer.addView(adView)
+        adView.loadAd(AdRequest.Builder().build())
+    }
 
+    private fun setupYouTubePlayer() {
+        lifecycle.addObserver(binding.youtubePlayerView)
+
+        val options = IFramePlayerOptions.Builder().controls(0).build()
         binding.youtubePlayerView.initialize(object : AbstractYouTubePlayerListener() {
             override fun onReady(player: YouTubePlayer) {
                 youTubePlayer = player
-                player.loadVideo(videoId, 0f)
+                if (videoId.isNotEmpty()) player.loadVideo(videoId, 0f)
             }
+
             override fun onStateChange(player: YouTubePlayer, state: PlayerConstants.PlayerState) {
-                isPlaying = state == PlayerConstants.PlayerState.PLAYING
-                binding.btnPlayPause.setImageResource(if (isPlaying) com.rank2gaming.aura.audio.R.drawable.ic_pause else com.rank2gaming.aura.audio.R.drawable.ic_play)
+                if (state == PlayerConstants.PlayerState.PLAYING) {
+                    isPlaying = true
+                    binding.btnPlayPause.setImageResource(R.drawable.ic_pause)
+                } else if (state == PlayerConstants.PlayerState.PAUSED || state == PlayerConstants.PlayerState.ENDED) {
+                    isPlaying = false
+                    binding.btnPlayPause.setImageResource(R.drawable.ic_play)
+                }
             }
-            override fun onVideoDuration(player: YouTubePlayer, dur: Float) {
-                duration = dur
-                binding.seekBar.max = dur.toInt()
-                binding.txtTotalTime.text = formatTime(dur)
-            }
+
             override fun onCurrentSecond(player: YouTubePlayer, second: Float) {
                 if (!isSeeking) {
                     binding.seekBar.progress = second.toInt()
                     binding.txtCurrentTime.text = formatTime(second)
                 }
             }
+
+            override fun onVideoDuration(player: YouTubePlayer, duration: Float) {
+                currentDuration = duration
+                binding.seekBar.max = duration.toInt()
+                binding.txtTotalTime.text = formatTime(duration)
+            }
         }, options)
     }
 
-    private fun loadAds() {
-        try {
-            val adView = AdView(this)
-            adView.setAdSize(AdSize.BANNER)
-            adView.adUnitId = "ca-app-pub-3940256099942544/6300978111"
-            binding.adContainer.addView(adView)
-            val adRequest = AdRequest.Builder().build()
-            adView.loadAd(adRequest)
-        } catch (e: Exception) { e.printStackTrace() }
-    }
-
-    private var isSeeking = false
     private fun setupControls() {
+        binding.btnBackPlayer.setOnClickListener { finish() }
+
         binding.btnPlayPause.setOnClickListener {
-            if (isPlaying) youTubePlayer?.pause() else youTubePlayer?.play()
+            if (isPlaying) {
+                youTubePlayer?.pause()
+            } else {
+                youTubePlayer?.play()
+            }
         }
+
+        // Use setClassName to avoid circular dependency with :audio module
+        binding.btnEqualizer.setOnClickListener { launchAudioActivity("com.rank2gaming.aura.audio.EqualizerSettingsActivity") }
+        binding.btnHd.setOnClickListener { launchAudioActivity("com.rank2gaming.aura.audio.HighDefAudioSettingsActivity") }
+        binding.btnBooster.setOnClickListener { launchAudioActivity("com.rank2gaming.aura.audio.SoundBoosterActivity") }
+
+        binding.btnFullscreen.setOnClickListener { toggleFullscreen() }
+
         binding.seekBar.setOnSeekBarChangeListener(object : SeekBar.OnSeekBarChangeListener {
             override fun onProgressChanged(seekBar: SeekBar?, progress: Int, fromUser: Boolean) {
                 if (fromUser) binding.txtCurrentTime.text = formatTime(progress.toFloat())
@@ -121,10 +130,15 @@ class YouTubePlayerActivity : AppCompatActivity() {
                 youTubePlayer?.seekTo(seekBar?.progress?.toFloat() ?: 0f)
             }
         })
-        binding.btnFullscreen.setOnClickListener { toggleFullscreen() }
-        binding.btnEqualizer.setOnClickListener { startActivity(Intent(this, EqualizerSettingsActivity::class.java)) }
-        binding.btnHd.setOnClickListener { startActivity(Intent(this, HighDefAudioSettingsActivity::class.java)) }
-        binding.btnBooster.setOnClickListener { startActivity(Intent(this, SoundBoosterActivity::class.java)) }
+    }
+
+    private fun launchAudioActivity(className: String) {
+        try {
+            val intent = Intent().setClassName(this, className)
+            startActivity(intent)
+        } catch (e: Exception) {
+            e.printStackTrace() // Log error if module is missing
+        }
     }
 
     @SuppressLint("ClickableViewAccessibility")
@@ -134,41 +148,51 @@ class YouTubePlayerActivity : AppCompatActivity() {
                 MotionEvent.ACTION_DOWN -> {
                     startY = event.y
                     startX = event.x
-                    currentVolume = audioManager?.getStreamVolume(AudioManager.STREAM_MUSIC) ?: 0
-                    isVolumeGesture = startX > deviceWidth * 0.66
-                    isBrightnessGesture = !isVolumeGesture
-                    true
+                    initialTouchVolume = audioManager?.getStreamVolume(AudioManager.STREAM_MUSIC) ?: 0
+                    initialTouchBrightness = window.attributes.screenBrightness
+                    if (initialTouchBrightness < 0) initialTouchBrightness = 0.5f
+                    isVolumeGesture = false
+                    isBrightnessGesture = false
                 }
                 MotionEvent.ACTION_MOVE -> {
                     val deltaY = startY - event.y
-                    if (abs(deltaY) > 50) {
-                        if (isVolumeGesture) adjustVolume(deltaY) else adjustBrightness(deltaY)
+                    val deltaX = event.x - startX
+
+                    if (abs(deltaY) > abs(deltaX) && abs(deltaY) > 50) {
+                        if (startX > deviceWidth / 2) {
+                            // Right side: Volume
+                            isVolumeGesture = true
+                            adjustVolume(deltaY)
+                        } else {
+                            // Left side: Brightness
+                            isBrightnessGesture = true
+                            adjustBrightness(deltaY)
+                        }
                     }
-                    true
                 }
                 MotionEvent.ACTION_UP -> {
                     binding.txtGestureIndicator.visibility = View.GONE
-                    if (abs(startY - event.y) < 20 && abs(startX - event.x) < 20) toggleControlsVisibility()
-                    true
+                    if (!isVolumeGesture && !isBrightnessGesture && abs(event.x - startX) < 20 && abs(event.y - startY) < 20) {
+                        toggleControlsVisibility()
+                    }
                 }
-                else -> false
             }
+            true
         }
     }
 
     private fun adjustVolume(deltaY: Float) {
-        val deltaVol = (deltaY / 300).toInt()
-        val newVol = (currentVolume + deltaVol).coerceIn(0, maxVolume)
+        val maxVol = audioManager?.getStreamMaxVolume(AudioManager.STREAM_MUSIC) ?: 15
+        val change = (deltaY / 500f * maxVol).toInt()
+        val newVol = (initialTouchVolume + change).coerceIn(0, maxVol)
         audioManager?.setStreamVolume(AudioManager.STREAM_MUSIC, newVol, 0)
-        showGestureIndicator("Vol: $newVol / $maxVolume")
+        showGestureIndicator("Vol: ${(newVol * 100 / maxVol)}%")
     }
 
     private fun adjustBrightness(deltaY: Float) {
+        val change = deltaY / 1000f
+        val newBright = (initialTouchBrightness + change).coerceIn(0.01f, 1.0f)
         val lp = window.attributes
-        var currentBright = lp.screenBrightness
-        if (currentBright < 0) currentBright = 0.5f
-        val deltaBright = deltaY / 5000
-        val newBright = (currentBright + deltaBright).coerceIn(0.01f, 1.0f)
         lp.screenBrightness = newBright
         window.attributes = lp
         showGestureIndicator("Bright: ${(newBright * 100).toInt()}%")
@@ -180,12 +204,13 @@ class YouTubePlayerActivity : AppCompatActivity() {
     }
 
     private fun toggleControlsVisibility() {
-        val v = if (binding.rightControlsPanel.visibility == View.VISIBLE) View.GONE else View.VISIBLE
-        binding.rightControlsPanel.visibility = v
-        binding.seekBarContainer.visibility = v
-        binding.btnBackPlayer.visibility = v
+        val isVisible = binding.rightControlsPanel.isVisible
+        binding.rightControlsPanel.isVisible = !isVisible
+        binding.seekBarContainer.isVisible = !isVisible
+        binding.btnBackPlayer.isVisible = !isVisible
     }
 
+    @SuppressLint("SourceLockedOrientationActivity")
     private fun toggleFullscreen() {
         isFullscreen = !isFullscreen
         if (isFullscreen) {
@@ -205,6 +230,6 @@ class YouTubePlayerActivity : AppCompatActivity() {
         val s = seconds.toInt()
         val m = s / 60
         val sec = s % 60
-        return String.format("%02d:%02d", m, sec)
+        return String.format(Locale.US, "%02d:%02d", m, sec)
     }
 }

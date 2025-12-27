@@ -15,7 +15,10 @@ class VideoHomeActivity : AppCompatActivity() {
         binding = ActivityVideoHomeBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-        window.statusBarColor = Color.parseColor("#FF0000") // YouTube Branding
+        // FIX: Suppress deprecation warning for Android 15 (API 35+)
+        // We explicitly want a Red status bar for YouTube branding.
+        @Suppress("DEPRECATION")
+        window.statusBarColor = Color.parseColor("#FF0000")
 
         binding.cardLocal.setOnClickListener {
             startActivity(Intent(this, LocalVideoListActivity::class.java))

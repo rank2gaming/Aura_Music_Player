@@ -228,13 +228,13 @@ class SoundBoosterActivity : AppCompatActivity() {
                 binding.layoutBassBoostApi.knob.setValue(8f)
                 binding.layoutTreble.knob.setValue(5f)
                 binding.layoutBoxy.knob.setValue(2f)
-                setGain(17f)
+                // setGain(17f) REMOVED
             }
             "Pop" -> {
                 binding.layoutClarity.knob.setValue(5f)
                 binding.layoutBass.knob.setValue(3f)
                 binding.layoutTreble.knob.setValue(4f)
-                setGain(16f)
+                // setGain(16f) REMOVED
                 binding.knobStereo.setValue(3f)
             }
             "Jazz" -> {
@@ -247,7 +247,7 @@ class SoundBoosterActivity : AppCompatActivity() {
                 binding.layoutBass.knob.setValue(8f)
                 binding.layoutBassBoostApi.knob.setValue(6f)
                 binding.layoutBright.knob.setValue(3f)
-                setGain(22f)
+                // setGain(22f) REMOVED
                 binding.knobStereo.setValue(6f)
             }
             "Classical" -> {
@@ -260,10 +260,10 @@ class SoundBoosterActivity : AppCompatActivity() {
                 binding.layoutBass.knob.setValue(6f)
                 binding.layoutBassBoostApi.knob.setValue(7f)
                 binding.layoutEquake.knob.setValue(5f)
-                setGain(20f)
+                // setGain(20f) REMOVED
             }
             "Normal" -> {
-                syncGainKnobToSystemVolume()
+                // syncGainKnobToSystemVolume() REMOVED
                 binding.knobStereo.setValue(0f)
             }
         }

@@ -1,13 +1,13 @@
 package com.rank2gaming.aura.youtube.utils
 
-// Response wrapper
+// Wrapper
 data class YouTubeResponse(
     val items: List<YouTubeVideoItem>?
 )
 
-// Renamed to avoid conflict with LocalVideoAdapter's VideoItem
+// Item
 data class YouTubeVideoItem(
-    val id: String,
+    val id: String, // Correct for 'videos' endpoint. (If using 'search', this would need to be an Object)
     val snippet: Snippet
 )
 

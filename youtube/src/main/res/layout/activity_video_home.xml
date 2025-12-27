@@ -24,12 +24,13 @@
             android:background="?attr/selectableItemBackgroundBorderless"
             android:clickable="true"
             android:focusable="true"
-            android:padding="4dp" />
+            android:padding="4dp"
+            android:contentDescription="@string/back_button_desc" />
 
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Video Section"
+            android:text="@string/video_section_title"
             android:textSize="22sp"
             android:textStyle="bold"
             android:textColor="#000000"
@@ -39,15 +40,18 @@
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Select Source"
-        android:textSize="16sp"
-        android:textColor="#666666"
-        android:layout_marginBottom="16dp"/>
+        android:text="@string/select_source"
+        android:textSize="18sp"
+        android:textStyle="bold"
+        android:textColor="#444444"
+        android:layout_gravity="center_horizontal"
+        android:layout_marginBottom="24dp"/>
 
     <androidx.cardview.widget.CardView
         android:id="@+id/card_local"
         android:layout_width="match_parent"
         android:layout_height="100dp"
+        android:layout_marginHorizontal="8dp"
         android:layout_marginBottom="20dp"
         app:cardCornerRadius="12dp"
         app:cardElevation="4dp">
@@ -62,8 +66,9 @@
             <ImageView
                 android:layout_width="40dp"
                 android:layout_height="40dp"
-                android:src="@drawable/ic_folder_video"
-                app:tint="#1976D2" />
+                android:src="@android:drawable/ic_menu_gallery"
+                app:tint="#1976D2"
+                android:contentDescription="@null" />
 
             <LinearLayout
                 android:layout_width="wrap_content"
@@ -74,7 +79,7 @@
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Videos (Device)"
+                    android:text="@string/local_videos"
                     android:textStyle="bold"
                     android:textSize="16sp"
                     android:textColor="#000000"/>
@@ -82,7 +87,7 @@
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Play local storage files"
+                    android:text="@string/local_videos_desc"
                     android:textSize="12sp"
                     android:textColor="#666666"/>
             </LinearLayout>
@@ -93,6 +98,7 @@
         android:id="@+id/card_online"
         android:layout_width="match_parent"
         android:layout_height="100dp"
+        android:layout_marginHorizontal="8dp"
         app:cardCornerRadius="12dp"
         app:cardElevation="4dp">
 
@@ -107,7 +113,8 @@
                 android:layout_width="40dp"
                 android:layout_height="40dp"
                 android:src="@drawable/ic_play_circle_filled"
-                app:tint="#D32F2F" />
+                app:tint="#D32F2F"
+                android:contentDescription="@null" />
 
             <LinearLayout
                 android:layout_width="wrap_content"
@@ -118,7 +125,7 @@
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Online Videos"
+                    android:text="@string/online_videos"
                     android:textStyle="bold"
                     android:textSize="16sp"
                     android:textColor="#000000"/>
@@ -126,7 +133,7 @@
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Stream trending content"
+                    android:text="@string/online_videos_desc"
                     android:textSize="12sp"
                     android:textColor="#666666"/>
             </LinearLayout>
